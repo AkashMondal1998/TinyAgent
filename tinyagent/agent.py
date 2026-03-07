@@ -58,18 +58,18 @@ class Agent:
 
             if resp.content.tool_calls:
                 for tool_call in resp.content.tool_calls:
-                    tool_name = tool_call.tool_name
+                    tool_id = tool_call.tool_id
                     tool_args = tool_call.tool_args
-                    tool_result = self.tools[tool_name].func(**tool_args)
-                    self.memory.update(Prompt(role='tool', content=str(tool_result)))
+                    tool_result = self.tools[tool_id](**tool_args)
+                    self.memory.update(Prompt(role='tool', tool_id=tool_id, content=str(tool_result)))
 
             if resp.content.sub_agent_calls:
                 for sub_agent_call in resp.content.sub_agent_calls:
-                    sub_agent_name = sub_agent_call.agent_name
+                    sub_agent_id = sub_agent_call.agent_id
                     sub_agent_prompt = sub_agent_call.prompt
-                    sub_agent = self.sub_agents[sub_agent_name]
+                    sub_agent = self.sub_agents[sub_agent_id]
                     sub_agent_resp = sub_agent.run(sub_agent_prompt)
-                    self.memory.update(Prompt(role='tool', content=sub_agent_resp))
+                    self.memory.update(Prompt(role='tool', tool_call_id=sub_agent_id, content=sub_agent_resp))
 
     def add_tool(self, func: Callable) -> None:
         self.tools[str(uuid.uuid4())] = Tool(func.__name__, func.__doc__, func)

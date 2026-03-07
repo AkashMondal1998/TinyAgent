@@ -1,13 +1,15 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field, Json
 
 
 class ToolCall(BaseModel):
-    tool_name: str = Field(description='Name of the tool')
+    tool_id: str = Field(description='Id of the tool')
     tool_args: dict = Field(description='Mapping of tool arg name and tool arg value')
 
 
 class SubAgentCall(BaseModel):
-    agent_name: str = Field(description='agent_name')
+    agent_id: str = Field(description='Id of the agent')
     prompt: str = Field(description='Prompt for the sub agent')
 
 
@@ -19,7 +21,7 @@ class Content(BaseModel):
 
 
 class ModelResponse(BaseModel):
-    role: str
+    role: Literal['assistant']
     content: Json[Content]
     thinking: str | None = None
 
@@ -27,3 +29,4 @@ class ModelResponse(BaseModel):
 class Prompt(BaseModel):
     role: str
     content: str
+    tool_call_id: str | None = None

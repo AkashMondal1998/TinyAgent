@@ -9,3 +9,6 @@ class Tool:
 
     def __repr__(self):
         return f'Tool(callable={self.name})'
+
+    def __call__(self, **kwargs):
+        return self.func(**kwargs)
