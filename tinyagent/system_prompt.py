@@ -18,6 +18,8 @@ Use the exit field when you think you have gathered the information and is ready
 
 Use the inlcuded tools and sub agents if any.
 Do not try to use tools or sub agents that are not there.
+
+Always respond using valid JSON that follows the above schema.
 """
 
 

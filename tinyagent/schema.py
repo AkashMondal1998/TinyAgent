@@ -1,6 +1,7 @@
+import json
 from typing import Literal
 
-from pydantic import BaseModel, Field, Json, field_serializer
+from pydantic import BaseModel, Field, Json, field_serializer, field_validator
 
 
 class ToolCall(BaseModel):
@@ -34,3 +35,10 @@ class ToolCallResult(BaseModel):
     role: Literal['tool'] = 'tool'
     content: str
     tool_call_id: str | None = None
+
+    @field_validator('content', mode='before')
+    @classmethod
+    def validate_content(cls, value):
+        if not isinstance(value, str):
+            value = json.dumps(value)
+        return value
