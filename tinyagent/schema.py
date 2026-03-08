@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field, Json
+from pydantic import BaseModel, Field, Json, field_serializer
 
 
 class ToolCall(BaseModel):
@@ -25,8 +25,12 @@ class ModelResponse(BaseModel):
     content: Json[Content]
     thinking: str | None = None
 
+    @field_serializer('content', mode='plain')
+    def ser(self, value: Content) -> str:
+        return value.model_dump_json()
 
-class Prompt(BaseModel):
-    role: str
+
+class ToolCallResult(BaseModel):
+    role: Literal['tool'] = 'tool'
     content: str
     tool_call_id: str | None = None
