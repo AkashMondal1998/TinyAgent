@@ -1,7 +1,7 @@
-from typing import Literal
+import json
+from typing import Literal,Any
 
-from pydantic import BaseModel, Field, Json
-from typing import Any
+from pydantic import BaseModel, Field, Json, field_serializer, field_validator
 
 
 class ToolCall(BaseModel):
@@ -26,11 +26,19 @@ class ModelResponse(BaseModel):
     content: Json[Content]
     thinking: str | None = None
 
+    @field_serializer('content', mode='plain')
+    def ser(self, value: Content) -> str:
+        return value.model_dump_json()
 
-class Prompt(BaseModel):
-    role: str
+
+class ToolCallResult(BaseModel):
+    role: Literal['tool'] = 'tool'
     content: str
     tool_call_id: str | None = None
-        
-    def __add__(self,other:Prompt):
-            self.content+='\n'+other.content
+
+    @field_validator('content', mode='before')
+    @classmethod
+    def validate_content(cls, value):
+        if not isinstance(value, str):
+            value = json.dumps(value)
+        return value
