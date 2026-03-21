@@ -3,7 +3,7 @@ from typing import Callable, Mapping, Self
 from pydantic import BaseModel
 
 from tinyagent.model import Model
-from tinyagent.schema import ModelResponse, ToolCallResult
+from tinyagent.schema import ToolCallResult
 from tinyagent.system_prompt import SystemPromptBuilder
 from tinyagent.tool import Tool
 
@@ -36,8 +36,8 @@ class Agent:
         self.description = description
         self.tools: Mapping[str, Tool] = {}
         self.sub_agents: Mapping[str, Self] = {}
-        self.response_type = response_type
-        self.system_prompt_builder = SystemPromptBuilder(system_prompt=system_prompt)
+        self.response_type = response_type if response_type else str
+        self.system_prompt_builder = SystemPromptBuilder(self.response_type, system_prompt=system_prompt)
         self.memory = Memory(name)
 
     def run(self, prompt: str):
@@ -61,11 +61,13 @@ class Agent:
 
     def _loop(self, messages: list[dict]):
         while True:
-            resp: ModelResponse = self.model.prompt(messages)
+            resp = self.model.prompt(messages, self.response_type)
             messages.append(resp.model_dump())
 
             if resp.content.exit:
-                return resp.content.response
+                return (
+                    resp.content.response if isinstance(self.response_type, str) else resp.content.response.model_dump()
+                )
 
             if resp.content.tool_calls:
                 for tool_call in resp.content.tool_calls:
