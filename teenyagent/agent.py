@@ -2,10 +2,10 @@ from typing import Callable, Mapping, Self
 
 from pydantic import BaseModel
 
-from tinyagent.model import Model
-from tinyagent.schema import ToolCallResult
-from tinyagent.system_prompt import SystemPromptBuilder
-from tinyagent.tool import Tool
+from teenyagent.model import Model
+from teenyagent.schema import ToolCallResult
+from teenyagent.system_prompt import SystemPromptBuilder
+from teenyagent.tool import Tool
 
 
 class Memory:
