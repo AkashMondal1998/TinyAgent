@@ -1,7 +1,9 @@
 import json
-from typing import Literal
+from typing import Generic, Literal, TypeVar
 
 from pydantic import BaseModel, Field, Json, field_serializer, field_validator
+
+T = TypeVar('T')
 
 
 class ToolCall(BaseModel):
@@ -14,20 +16,20 @@ class SubAgentCall(BaseModel):
     prompt: str = Field(description='Prompt for the sub agent')
 
 
-class Content(BaseModel):
-    response: str | None = Field(default=None, description='Response')
+class ModelResponse(BaseModel, Generic[T]):
+    response: T | None = Field(default=None, description='Response')
     tool_calls: list[ToolCall] = Field(default=[], description='list of tool calls')
     sub_agent_calls: list[SubAgentCall] = Field(default=[], description='list of sub agent calls')
     exit: bool = Field(default=False, description='Continue evaluation or not')
 
 
-class ModelResponse(BaseModel):
+class Message(BaseModel, Generic[T]):
     role: Literal['assistant']
-    content: Json[Content]
+    content: Json[ModelResponse[T]]
     thinking: str | None = None
 
     @field_serializer('content', mode='plain')
-    def ser(self, value: Content) -> str:
+    def ser(self, value: ModelResponse[T]) -> str:
         return value.model_dump_json()
 
 

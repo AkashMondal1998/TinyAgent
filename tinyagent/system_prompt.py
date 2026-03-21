@@ -1,12 +1,14 @@
 from typing import TYPE_CHECKING
 
 import jinja2
+from pydantic import BaseModel
 
-from tinyagent.schema import Content
+from tinyagent.schema import ModelResponse
+from tinyagent.tool import Tool
 
 if TYPE_CHECKING:
     from tinyagent.agent import Agent
-    from tinyagent.tool import Tool
+
 
 DEFAULT_RESPONSE_PROMPT = """ Follow this schema for generating responses
 Response schema: {{response_schema}}
@@ -38,19 +40,18 @@ SUB_AGENT_DEFINITION = """
 
 
 class SystemPromptBuilder:
-    def __init__(self, system_prompt: str | None = None):
+    def __init__(self, response_type: BaseModel, system_prompt: str | None = None):
         if system_prompt:
             self.system_prompt = {'role': 'system', 'content': system_prompt}
         else:
             self.system_prompt = {'role': 'system', 'content': ''}
 
         self.system_prompt['content'] += '\n\n' + jinja2.Template(DEFAULT_RESPONSE_PROMPT).render(
-            response_schema=Content.model_json_schema()
+            response_schema=ModelResponse[response_type].model_json_schema()
         )
 
         self.tool_template = jinja2.Template(TOOL_DEFINITION)
         self.sub_agent_template = jinja2.Template(SUB_AGENT_DEFINITION)
-        self.response_schema = jinja2.Template(DEFAULT_RESPONSE_PROMPT)
 
     def add_tool(self, tool: Tool):
         self.system_prompt['content'] += '\n\n' + self.tool_template.render(tool=tool)
