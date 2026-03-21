@@ -37,7 +37,7 @@ class Agent:
         self.tools: Mapping[str, Tool] = {}
         self.sub_agents: Mapping[str, Self] = {}
         self.response_type = response_type if response_type else str
-        self.system_prompt_builder = SystemPromptBuilder(response_type, system_prompt=system_prompt)
+        self.system_prompt_builder = SystemPromptBuilder(self.response_type, system_prompt=system_prompt)
         self.memory = Memory(name)
 
     def run(self, prompt: str):

@@ -40,7 +40,7 @@ SUB_AGENT_DEFINITION = """
 
 
 class SystemPromptBuilder:
-    def __init__(self, response_type: BaseModel, system_prompt: str | None = None):
+    def __init__(self, response_type: BaseModel | str, system_prompt: str | None = None):
         if system_prompt:
             self.system_prompt = {'role': 'system', 'content': system_prompt}
         else:
