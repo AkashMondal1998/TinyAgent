@@ -1,3 +1,3 @@
-# TinyAgent
+# TeenyAgent
 
-A tiny agentic framework
+A teeny agentic framework

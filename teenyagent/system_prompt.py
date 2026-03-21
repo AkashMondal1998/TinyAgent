@@ -3,11 +3,11 @@ from typing import TYPE_CHECKING
 import jinja2
 from pydantic import BaseModel
 
-from tinyagent.schema import ModelResponse
-from tinyagent.tool import Tool
+from teenyagent.schema import ModelResponse
+from teenyagent.tool import Tool
 
 if TYPE_CHECKING:
-    from tinyagent.agent import Agent
+    from teenyagent.agent import Agent
 
 
 DEFAULT_RESPONSE_PROMPT = """ Follow this schema for generating responses

@@ -3,7 +3,7 @@ import os
 import requests
 from pydantic import BaseModel
 
-from tinyagent.schema import Message
+from teenyagent.schema import Message
 
 
 class Model:
