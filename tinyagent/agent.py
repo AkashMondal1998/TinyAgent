@@ -30,6 +30,7 @@ class Agent:
         system_prompt: str | None = None,
         description: str | None = None,
         response_type: BaseModel | None = None,
+        memory: bool = False,
     ):
         self.name = name
         self.model = model
@@ -38,24 +39,40 @@ class Agent:
         self.sub_agents: Mapping[str, Self] = {}
         self.response_type = response_type if response_type else str
         self.system_prompt_builder = SystemPromptBuilder(self.response_type, system_prompt=system_prompt)
-        self.memory = Memory(name)
+        self._memory = Memory(name) if memory else None
+
+    @property
+    def memory(self) -> bool:
+        return bool(self._memory)
+
+    def add_tool(self, func: Callable) -> None:
+        tool = Tool(func.__name__, func.__doc__, func)
+        self.tools[func.__name__] = tool
+        self.system_prompt_builder.add_tool(tool)
+
+    def tool(self, func: Callable) -> Callable:
+        self.add_tool(func)
+        return func
+
+    def add_sub_agent(self, agent: Self) -> None:
+        self.sub_agents[agent.name] = agent
+        self.system_prompt_builder.add_sub_agent(agent)
 
     def run(self, prompt: str):
-        # Build conversation history from:
-        # - stored message history
-        # - system prompt
-        # - current user prompt
-        messages = (
-            [self.system_prompt_builder.system_prompt] + self.memory.messages + [{'role': 'user', 'content': prompt}]
-        )
+        # Add system prompt
+        messages = [self.system_prompt_builder.system_prompt]
+        if self._memory:
+            # Add stored message history
+            messages += self._memory.messages
+
+        # Add current user prompt
+        messages += [{'role': 'user', 'content': prompt}]
 
         resp = self._loop(messages)
 
-        # Remove system prompt
-        messages.pop(0)
-
-        # Set the updated conversation history to memory
-        self.memory.messages = messages
+        if self._memory:
+            # Set the updated conversation history to memory without system prompt
+            self._memory.messages = messages[1:]
 
         return resp
 
@@ -84,18 +101,10 @@ class Agent:
                     sub_agent_resp = sub_agent.run(sub_agent_prompt)
                     messages.append(ToolCallResult(tool_call_id=sub_agent_id, content=sub_agent_resp).model_dump())
 
-    def add_tool(self, func: Callable) -> None:
-        tool = Tool(func.__name__, func.__doc__, func)
-        self.tools[func.__name__] = tool
-        self.system_prompt_builder.add_tool(tool)
-
-    def tool(self, func: Callable) -> Callable:
-        self.add_tool(func)
-        return func
-
-    def add_sub_agent(self, agent: Self) -> None:
-        self.sub_agents[agent.name] = agent
-        self.system_prompt_builder.add_sub_agent(agent)
-
     def __repr__(self) -> str:
-        return f'Agent(model={self.model.name} tools={[tool for tool in self.tools.values()]})'
+        return (
+            f'Agent('
+            f'model={self.model.name}, '
+            f'tools={[tool_name for tool_name in self.tools]}, '
+            f'sub_agents={[sub_agent_name for sub_agent_name in self.sub_agents]})'
+        )
