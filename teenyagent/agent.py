@@ -82,9 +82,7 @@ class Agent:
             messages.append(resp.model_dump())
 
             if resp.content.exit:
-                return (
-                    resp.content.response if isinstance(self.response_type, str) else resp.content.response.model_dump()
-                )
+                return resp.content.response if self.response_type is str else resp.content.response.model_dump()
 
             if resp.content.tool_calls:
                 for tool_call in resp.content.tool_calls:
