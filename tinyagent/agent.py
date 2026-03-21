@@ -106,5 +106,6 @@ class Agent:
             f'Agent('
             f'model={self.model.name}, '
             f'tools={[tool_name for tool_name in self.tools]}, '
-            f'sub_agents={[sub_agent_name for sub_agent_name in self.sub_agents]})'
+            f'sub_agents={[sub_agent_name for sub_agent_name in self.sub_agents]}, '
+            f'memory={self.memory})'
         )
