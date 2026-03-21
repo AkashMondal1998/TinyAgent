@@ -1,5 +1,4 @@
 import os
-from pprint import pprint
 
 import requests
 from pydantic import BaseModel
@@ -20,7 +19,6 @@ class Model:
             'format': 'json',
             'options': {'temperature': 0},
         }
-        pprint(Message[response_type].model_json_schema())
         with requests.post(
             'https://ollama.com/api/chat', json=data, headers={'Authorization': f'Bearer {self.api_key}'}
         ) as response:
